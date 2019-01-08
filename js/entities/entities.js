@@ -1,3 +1,5 @@
+/// <reference path="../../lib/melonjs.js" />
+
 /**
  * Player Entity
  */
@@ -9,12 +11,44 @@ game.PlayerEntity = me.Entity.extend({
     init:function (x, y, settings) {
         // call the constructor
         this._super(me.Entity, 'init', [x, y , settings]);
+
+        this.body.setMaxVelocity(3, 15);
+        this.body.setFriction(0.4, 0);
+
+        me.game.viewport.follow(this.pos, me.game.viewport.AXIS.BOTH, 0.4);
+
+        this.alwaysUpdate = true;
+
+        this.renderable.addAnimation("walk", [0, 1, 2, 3, 4, 5, 6, 7]);
+        this.renderable.addAnimation("stand", [0]);
+
+        this.renderable.setCurrentAnimation("stand");
     },
 
     /**
      * update the entity
      */
     update : function (dt) {
+
+        if (me.input.isKeyPressed("left")) {
+            this.renderable.flipX(true);
+            this.body.force.x = -this.body.maxVel.x;
+
+            if (!this.renderable.isCurrentAnimation("walk")) {
+                this.renderable.setCurrentAnimation("walk");
+            }
+        } else if (me.input.isKeyPressed("right")) {
+            this.renderable.flipX(false);
+            this.body.force.x = this.body.maxVel.x;
+
+            if (!this.renderable.isCurrentAnimation("walk")) {
+                this.renderable.setCurrentAnimation("walk");
+            }
+        } else {
+            this.body.force.x = 0;
+            this.renderable.setCurrentAnimation("stand");
+        }
+
 
         // apply physics to the body (this moves the entity)
         this.body.update(dt);
